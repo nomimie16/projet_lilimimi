@@ -36,7 +36,7 @@ import MG2D.geometrie.Point;
  * <br /><br />
  * Elle permet de gérer la position et les clics de la souris dans une fenêtre créée avec la bibliothèque MG2D.
  * @author Rémi Synave
- * @version 2.9
+ * @version 2.2
  */
 
 public class Souris implements MouseListener, MouseMotionListener {

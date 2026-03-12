@@ -26,6 +26,7 @@
 
 package MG2D.geometrie;
 
+
 import java.awt.Graphics;
 
 /**
@@ -34,7 +35,7 @@ import java.awt.Graphics;
  * <br /><br />
  * Elle hérite de la classe Ovale afin que toutes les méthodes de la classe Ovale s'applique également à celle-ci.
  * @author Equipe 2D, Rémi Synave
- * @version 2.9
+ * @version 2.2
  */
 public class Cercle extends Ovale {
 

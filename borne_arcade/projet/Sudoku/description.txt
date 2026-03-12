@@ -1,0 +1,6 @@
+Sudoku - Châtelain Lilou et Noémie Lignier - 2026
+
+Remplir la grille pour que chaque 
+ligne, colonne et région ne doit 
+contenir qu'une seule fois tous 
+les chiffres de un à neuf.

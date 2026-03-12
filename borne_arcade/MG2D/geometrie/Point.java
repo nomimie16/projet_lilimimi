@@ -26,13 +26,14 @@
 
 package MG2D.geometrie;
 
+
 import java.awt.Graphics;
 
 /**
  * Cette classe permet la création de points.<br />
  * Un Point est défini par deux entiers (abscisse et ordonnée).
  * @author Equipe 2D, Rémi Synave
- * @version 2.9
+ * @version 2.2
  */
 public class Point extends Dessin {
 
