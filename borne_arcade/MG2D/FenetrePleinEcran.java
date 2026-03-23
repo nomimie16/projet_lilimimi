@@ -60,6 +60,11 @@ public class FenetrePleinEcran extends Fenetre {
 	GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
 	this.setVisible (true);
     }
+
+    /*public FenetrePleinEcran(String ttitre) {
+    super(ttitre, 1280, 1024);
+    this.setVisible(true);
+    }*/
     
 
 }

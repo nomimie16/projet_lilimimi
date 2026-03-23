@@ -1,0 +1,7 @@
+Sudoku- Lilou et Noémie
+
+Jeu simple réalisé en Java pour un sudoku
+MG2D pour illustrer toute la puissance de
+celle-ci. Jeu particulièrement bien codé avec une
+musique entraînante.
+

@@ -124,10 +124,17 @@ public class Panneau extends JPanel {
      * Méthode appelée automatiquement afin d'afficher le contenu de la liste dans la zone d'affichage.<br />
      * Cette méthode ne doit pas être appelée.
      */
-    public void paint ( Graphics g ) {
+    /*public void paint ( Graphics g ) {
 	// On parcourt la ArrayList via une boucle for() qui affiche un à un le contenu de a.
 	for ( int i = 0; i < a.size(); i++ )
 	    a.get( i ).afficher( g );
+    }*/
+    @Override
+    protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    for (int i = 0; i < a.size(); i++) {
+    a.get(i).afficher(g);
+    }
     }
 
     /**
