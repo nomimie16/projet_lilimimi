@@ -11,8 +11,8 @@ import java.awt.Font;
 import javax.swing.JPanel;
 
 import MG2D.audio.*;
-
-
+import 
+grille.*;
 public class Sudoku {
 
     //CONSTANTES
@@ -227,6 +227,9 @@ public class Sudoku {
         updateSelectionGraphique();
         f.rafraichir();
     }
+
+    // Grille 
+
     
     //INITIALISATION DU JEU
     public void GeneratejeuSudoku() {
