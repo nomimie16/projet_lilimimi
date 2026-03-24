@@ -3,6 +3,7 @@ import MG2D.geometrie.Point;
 import MG2D.geometrie.Rectangle;
 import MG2D.geometrie.Texte;
 import MG2D.geometrie.Couleur;
+import MG2D.geometrie.Ligne;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -11,94 +12,175 @@ import MG2D.audio.*;
 
 public class Sudoku {
 
-    private final int largeur = 1280;
-    private final int hauteur = 1024;
-    private final int tailleGrille = 9;
-    private final int tailleCase = 80;
+    // ------------ CONSTANTES ------------
+    private static final int LARGEUR = 1280;
+    private static final int HAUTEUR = 1024;
+    private static final int TAILLE_GRILLE = 9;
+    private static final int TAILLE_CASE = 80;
+    private static final int LARGEUR_ITEM = 300, HAUTEUR_ITEM = 50;
+    private static final int MARGE_SELECTION = 10;
+    private static final int Y_ITEMS = 200;
 
-    private int largeurItem = 300, hauteurItem = 50;
-    private int margeSelection = 10;
-    private int yItems = 200;
-
+    //Fenêtre
     private FenetrePleinEcran f;
     private ClavierBorneArcade clavier;
-
     private int status = 0;
 
+    //Grilles de sudoku
     private int[][] grille;
     private int[][] grilleComplete;
     private int[][] grilleSolution;
 
+    //Menu
     private Rectangle[] boutonMenu = new Rectangle[2];
     private Rectangle selection;
     private Rectangle jouer, exit;
-
     private int pointeur = 0;
 
+    //Curseur pour la case sélectionnée
     private int posLigneSelection = 0;
     private int posColonneSelection = 0;
-
     private Texte[][] textesGrille;
     private Rectangle curseur;
 
+    //Poistion de départ
     private int startX = 100;
     private int startY = 100;
 
     private Musique m;
 
+    // ------------ CONSTRUCTEUR ------------
     public Sudoku() {
+        //Création de la fen$etre plein écran
         f = new FenetrePleinEcran("SUDOKU");
         f.setVisible(true);
         f.setBackground(Color.BLACK);
 
+        //Initialisation du clavier
         clavier = new ClavierBorneArcade();
         f.addKeyListener(clavier);
         f.getP().addKeyListener(clavier);
 
+        //Géneartion du menu principal
         generateMenu();
     }
 
-    // ---------------- MENU ----------------
+    // ------------ MENU -----------
     public void generateMenu() {
+        //Effacer l'ecran et l'initialiser à noir
         f.effacer();
+        f.setBackground(Color.BLACK);
+        Couleur bleuFond = new Couleur(18, 22, 35);
+        Couleur bleuBordure = new Couleur(30, 50, 80);
 
-        jouer = new Rectangle(Couleur.BLANC, new Point((largeur - largeurItem) / 2, yItems), largeurItem, hauteurItem, true);
-        exit = new Rectangle(Couleur.BLANC, new Point((largeur - largeurItem) / 2, yItems - 2 * hauteurItem), largeurItem, hauteurItem, true);
-        selection = new Rectangle(Couleur.ROUGE,
-                new Point((largeur - largeurItem) / 2 - margeSelection, yItems - margeSelection),
-                largeurItem + 2 * margeSelection,
-                hauteurItem + 2 * margeSelection, true);
+        //Grille décorative
+        for (int i = 0; i < TAILLE_GRILLE; i++) {
+            for (int j = 0; j < TAILLE_GRILLE; j++) {
+                Rectangle cellFond = new Rectangle(bleuFond,
+                        new Point(50 + j * 130, 50 + i * 100),
+                        new Point(50 + (j + 1) * 130, 50 + (i + 1) * 100), false);
+                f.ajouter(cellFond);
+            }
+        }
 
-        boutonMenu[0] = jouer;
-        boutonMenu[1] = exit;
+        //Ligne épaisses pour les blocs de 3
+        for (int bloc = 0; bloc <= 3; bloc++) {
+            int xV = 50 + bloc * 3 * 130;
+            int yH = 50 + bloc * 3 * 100;
+            for (int e = -1; e <= 1; e++) {
+                f.ajouter(new Ligne(bleuBordure, new Point(xV + e, 50), new Point(xV + e, 950)));
+                f.ajouter(new Ligne(bleuBordure, new Point(50, yH + e), new Point(1230, yH + e)));
+            }
+        }
 
-        f.ajouter(selection);
-        f.ajouter(jouer);
-        f.ajouter(exit);
+        //Coins pour la déco
+        int marge = 30, tailleCoin = 35;
+        for (int e = 0; e < 3; e++) {
+            ajouterCoinDecoratif(e, marge, tailleCoin);
+        }
 
-        Texte t1 = new Texte(Couleur.NOIR, "PLAY", new Font("Calibri", Font.TYPE1_FONT, 40), new Point());
-        t1.setA(new Point((largeur - t1.getLargeur()) / 2, yItems + 10));
-        f.ajouter(t1);
-
-        Texte t2 = new Texte(Couleur.NOIR, "EXIT", new Font("Calibri", Font.TYPE1_FONT, 40), new Point());
-        t2.setA(new Point((largeur - t2.getLargeur()) / 2, yItems - hauteurItem + 10));
-        f.ajouter(t2);
-
-        Texte titre = new Texte(Couleur.BLANC, "SUDOKU", new Font("Arial", Font.TYPE1_FONT, 150), new Point(300, 700));
-        f.ajouter(titre);
-
+        ajouterTitreSousTitre();
+        ajouterBoutons();
         f.rafraichir();
     }
 
+    private void ajouterCoinDecoratif(int e, int marge, int tailleCoin) {
+        //Haut-gauche
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(marge + e, marge), new Point(marge + tailleCoin, marge + e)));
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(marge + e, marge), new Point(marge + e, marge + tailleCoin)));
+        //Haut-droit
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(LARGEUR - marge - tailleCoin, marge + e), new Point(LARGEUR - marge - e, marge + e)));
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(LARGEUR - marge - e, marge), new Point(LARGEUR - marge - e, marge + tailleCoin)));
+        //Bas-gauche
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(marge + e, HAUTEUR - marge), new Point(marge + tailleCoin, HAUTEUR - marge - e)));
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(marge + e, HAUTEUR - marge - tailleCoin), new Point(marge + e, HAUTEUR - marge)));
+        //Bas-droit
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(LARGEUR - marge - tailleCoin, HAUTEUR - marge - e), new Point(LARGEUR - marge - e, HAUTEUR - marge - e)));
+        f.ajouter(new Ligne(Couleur.BLANC, new Point(LARGEUR - marge - e, HAUTEUR - marge - tailleCoin), new Point(LARGEUR - marge - e, HAUTEUR - marge)));
+    }
+
+    private void ajouterTitreSousTitre() {
+        //Sous-titre
+        Texte soustitre = new Texte(Couleur.BLEU, "P U Z Z L E   G A M E",
+                new Font("Calibri", Font.PLAIN, 18), new Point(0, 0));
+        soustitre.setA(new Point((LARGEUR - soustitre.getLargeur()) / 2, 585));
+        f.ajouter(soustitre);
+
+        //Titre principal
+        Texte titre = new Texte(Couleur.BLANC, "SUDOKU", new Font("Arial", Font.BOLD, 130), new Point(0, 0));
+        titre.setA(new Point((LARGEUR - titre.getLargeur()), 710));
+        f.ajouter(titre);
+
+        //Lignes sous le titre
+        int cx = LARGEUR / 2;
+        f.ajouter(new Ligne(Couleur.BLEU, new Point(cx - 80, 720), new Point(cx - 14, 720)));
+        f.ajouter(new Ligne(Couleur.BLEU, new Point(cx + 14, 720), new Point(cx + 80, 720)));
+        f.ajouter(new Rectangle(Couleur.BLEU, new Point(cx - 5, 715), new Point(cx + 5, 725), true));
+    }
+
+    //Bouton début du jeu : jouer ou quitter
+    private void ajouterBoutons() {
+        Couleur bleu = new Couleur(74, 158, 255);
+        int bx = (LARGEUR - LARGEUR_ITEM) / 2;
+        jouer = new Rectangle(bleu, new Point(bx, Y_ITEMS), new Point(bx + LARGEUR_ITEM, Y_ITEMS + HAUTEUR_ITEM), true);
+        f.ajouter(jouer);
+
+        exit = new Rectangle(Couleur.NOIR, new Point(bx, Y_ITEMS - 2 * HAUTEUR_ITEM),
+                new Point(bx + LARGEUR_ITEM, Y_ITEMS - HAUTEUR_ITEM), true);
+        f.ajouter(exit);
+
+        // Contours blancs
+        f.ajouter(new Rectangle(Couleur.BLANC, new Point(bx, Y_ITEMS),
+                new Point(bx + LARGEUR_ITEM, Y_ITEMS + HAUTEUR_ITEM), false));
+        f.ajouter(new Rectangle(Couleur.BLANC, new Point(bx, Y_ITEMS - 2 * HAUTEUR_ITEM),
+                new Point(bx + LARGEUR_ITEM, Y_ITEMS - HAUTEUR_ITEM), false));
+
+        Texte t1 = new Texte(Couleur.BLANC, "JOUER", new Font("Arial", Font.BOLD, 26), new Point(0, 0));
+        t1.setA(new Point((LARGEUR - t1.getLargeur()) / 2, Y_ITEMS + 10));
+        f.ajouter(t1);
+
+        Texte t2 = new Texte(Couleur.BLANC, "QUITTER", new Font("Arial", Font.BOLD, 24), new Point(0, 0));
+        t2.setA(new Point((LARGEUR - t2.getLargeur()) / 2, Y_ITEMS - 2 * HAUTEUR_ITEM + 13));
+        f.ajouter(t2);
+
+        boutonMenu[0] = jouer;
+        boutonMenu[1] = exit;
+        pointeur = 0;
+    }
+
     public int majMenu() {
+        Couleur bleu = new Couleur(74, 158, 255);
+
         if (clavier.getJoyJ1HautTape() && pointeur > 0) {
             pointeur--;
-            selection.translater(0, hauteurItem * 2);
+            jouer.setCouleur(bleu);
+            exit.setCouleur(Couleur.NOIR);
         }
 
         if (clavier.getJoyJ1BasTape() && pointeur < 1) {
             pointeur++;
-            selection.translater(0, -hauteurItem * 2);
+            jouer.setCouleur(Couleur.NOIR);
+            exit.setCouleur(bleu);
         }
 
         if (clavier.getBoutonJ1ATape()) {
@@ -117,65 +199,74 @@ public class Sudoku {
     // ---------------- JEU ----------------
     public void generateJeuSudoku() {
         f.effacer();
-
-        grille = new int[tailleGrille][tailleGrille];
-        grilleComplete = new int[tailleGrille][tailleGrille];
-        grilleSolution = new int[tailleGrille][tailleGrille];
+        grille = new int[TAILLE_GRILLE][TAILLE_GRILLE];
+        grilleComplete = new int[TAILLE_GRILLE][TAILLE_GRILLE];
+        grilleSolution = new int[TAILLE_GRILLE][TAILLE_GRILLE];
 
         Grille g = new Grille();
         grille = g.getGrille();
         grilleSolution = g.getSolution();
 
-        // Copier grille initiale pour cases fixes
-        for (int i = 0; i < tailleGrille; i++)
-            System.arraycopy(grille[i], 0, grilleComplete[i], 0, tailleGrille);
+        for (int i = 0; i < TAILLE_GRILLE; i++) {
+            System.arraycopy(grille[i], 0, grilleComplete[i], 0, TAILLE_GRILLE);
+        }
 
-        textesGrille = new Texte[tailleGrille][tailleGrille];
-
+        textesGrille = new Texte[TAILLE_GRILLE][TAILLE_GRILLE];
         posLigneSelection = 0;
         posColonneSelection = 0;
 
         afficherGrille();
         mettreAJourCurseur();
 
-        // Musique
         m = new Musique("Tied_Up.mp3");
         m.lecture();
     }
 
     private void afficherGrille() {
-        for (int i = 0; i < tailleGrille; i++) {
-            for (int j = 0; j < tailleGrille; j++) {
-
-                // fond case
+        // Afficher les cases et bordures
+        for (int i = 0; i < TAILLE_GRILLE; i++) {
+            for (int j = 0; j < TAILLE_GRILLE; j++) {
                 Rectangle fond = new Rectangle(Couleur.BLANC,
-                        new Point(startX + j * tailleCase, startY + i * tailleCase),
-                        new Point(startX + (j + 1) * tailleCase, startY + (i + 1) * tailleCase), true);
+                        new Point(startX + j * TAILLE_CASE, startY + i * TAILLE_CASE),
+                        new Point(startX + (j + 1) * TAILLE_CASE, startY + (i + 1) * TAILLE_CASE), true);
                 f.ajouter(fond);
 
-                // bordure
                 Rectangle bord = new Rectangle(Couleur.NOIR,
-                        new Point(startX + j * tailleCase, startY + i * tailleCase),
-                        new Point(startX + (j + 1) * tailleCase, startY + (i + 1) * tailleCase), false);
+                        new Point(startX + j * TAILLE_CASE, startY + i * TAILLE_CASE),
+                        new Point(startX + (j + 1) * TAILLE_CASE, startY + (i + 1) * TAILLE_CASE), false);
                 f.ajouter(bord);
 
                 String txt = (grille[i][j] == 0) ? "" : String.valueOf(grille[i][j]);
                 Couleur c = (grilleComplete[i][j] == 0) ? Couleur.BLEU : Couleur.NOIR;
-
-                textesGrille[i][j] = new Texte(c, txt,
-                        new Font("Calibri", Font.TYPE1_FONT, 40),
-                        new Point(startX + j * tailleCase + 25, startY + i * tailleCase + 25));
+                textesGrille[i][j] = new Texte(c, txt, new Font("Calibri", Font.TYPE1_FONT, 40),
+                        new Point(startX + j * TAILLE_CASE + 25, startY + i * TAILLE_CASE + 25));
                 f.ajouter(textesGrille[i][j]);
             }
         }
 
-        // curseur
-        curseur = new Rectangle(Couleur.ROUGE,
-                new Point(startX, startY),
-                new Point(startX + tailleCase, startY + tailleCase), false);
+        // Bordures épaisses pour les blocs 3x3
+        int epaisseur = 3;
+        for (int bloc = 0; bloc <= 3; bloc++) {
+            int xV = startX + bloc * 3 * TAILLE_CASE;
+            int yH = startY + bloc * 3 * TAILLE_CASE;
+
+            for (int e = -epaisseur; e <= epaisseur; e++) {
+                Ligne ligneV = new Ligne(Couleur.NOIR,
+                        new Point(xV + e, startY), new Point(xV + e, startY + TAILLE_GRILLE * TAILLE_CASE));
+                f.ajouter(ligneV);
+
+                Ligne ligneH = new Ligne(Couleur.NOIR,
+                        new Point(startX, yH + e), new Point(startX + TAILLE_GRILLE * TAILLE_CASE, yH + e));
+                f.ajouter(ligneH);
+            }
+        }
+
+        // Curseur
+        curseur = new Rectangle(Couleur.VERT, new Point(startX, startY),
+        new Point(startX + TAILLE_CASE, startY + TAILLE_CASE), false);
         f.ajouter(curseur);
 
-        // info touches
+        // Afficher les informations sur les touches
         Texte info = new Texte(Couleur.BLANC,
                 "A:+1  B:-1  C:effacer  Z:quitter",
                 new Font("Calibri", Font.TYPE1_FONT, 20),
@@ -235,23 +326,23 @@ public class Sudoku {
     }
 
     private void updateAffichageGrille() {
-        for (int i = 0; i < tailleGrille; i++)
-            for (int j = 0; j < tailleGrille; j++) {
+        for (int i = 0; i < TAILLE_GRILLE; i++)
+            for (int j = 0; j < TAILLE_GRILLE; j++) {
                 String txt = (grille[i][j] == 0) ? "" : String.valueOf(grille[i][j]);
                 textesGrille[i][j].setTexte(txt);
             }
     }
 
     private void mettreAJourCurseur() {
-        int x = startX + posColonneSelection * tailleCase;
-        int y = startY + posLigneSelection * tailleCase;
+        int x = startX + posColonneSelection * TAILLE_CASE;
+        int y = startY + posLigneSelection * TAILLE_CASE;
         curseur.setA(new Point(x, y));
-        curseur.setB(new Point(x + tailleCase, y + tailleCase));
+        curseur.setB(new Point(x + TAILLE_CASE, y + TAILLE_CASE));
     }
 
     private boolean isGrilleComplete() {
-        for (int i = 0; i < tailleGrille; i++)
-            for (int j = 0; j < tailleGrille; j++)
+        for (int i = 0; i < TAILLE_GRILLE; i++)
+            for (int j = 0; j < TAILLE_GRILLE; j++)
                 if (grille[i][j] != grilleSolution[i][j])
                     return false;
         return true;
