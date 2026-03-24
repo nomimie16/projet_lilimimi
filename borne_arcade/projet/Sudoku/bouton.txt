@@ -1,1 +1,1 @@
-Déplacement barre:rien:rien:Quitter:Intervertir:rien:rien
+Naviguer dans la grille:Jouer:Quitter:Effacer la case:Augmenter:Diminuer

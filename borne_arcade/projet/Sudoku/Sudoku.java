@@ -47,8 +47,6 @@ public class Sudoku {
     private int startX = 100;
     private int startY = 100;
 
-    private Musique m;
-
     // ------------ CONSTRUCTEUR ------------
     public Sudoku() {
         //Création de la fen$etre plein écran
@@ -120,8 +118,9 @@ public class Sudoku {
     }
 
     private void ajouterTitreSousTitre() {
+        Couleur bleu = new Couleur(74, 158, 255);
         //Sous-titre
-        Texte soustitre = new Texte(Couleur.BLEU, "P U Z Z L E   G A M E", new Font("Calibri", Font.PLAIN, 18), new Point(0, 0));
+        Texte soustitre = new Texte(bleu, "P U Z Z L E   G A M E", new Font("Calibri", Font.PLAIN, 18), new Point(0, 0));
         soustitre.setA(new Point((LARGEUR - soustitre.getLargeur()) / 2, 585));
         f.ajouter(soustitre);
 
@@ -131,10 +130,10 @@ public class Sudoku {
         f.ajouter(titre);
 
         //Ligne déco sous le titre
-        int cx = LARGEUR / 2;
-        f.ajouter(new Ligne(Couleur.BLEU, new Point(cx - 80, 720), new Point(cx - 14, 720)));
-        f.ajouter(new Ligne(Couleur.BLEU, new Point(cx + 14, 720), new Point(cx + 80, 720)));
-        f.ajouter(new Rectangle(Couleur.BLEU, new Point(cx - 5, 715), new Point(cx + 5, 725), true));
+        //int cx = LARGEUR / 2;
+        //f.ajouter(new Ligne(Couleur.BLEU, new Point(cx - 80, 720), new Point(cx - 14, 720)));
+        //f.ajouter(new Ligne(Couleur.BLEU, new Point(cx + 14, 720), new Point(cx + 80, 720)));
+        //f.ajouter(new Rectangle(Couleur.BLEU, new Point(cx - 5, 715), new Point(cx + 5, 725), true));
     }
 
     //Bouton début du jeu : jouer ou quitter
@@ -224,9 +223,6 @@ public class Sudoku {
         //affichage de la grille et du curseur
         afficherGrille();
         mettreAJourCurseur();
-        //lance la musique
-        m = new Musique("Tied_Up.mp3");
-        m.lecture();
     }
 
     //dessine la grille (bordures et les cases)
