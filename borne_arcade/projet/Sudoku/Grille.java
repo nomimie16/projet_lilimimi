@@ -111,6 +111,6 @@ public class Grille {
         for (int i = 0; i < 9; i++)
             System.arraycopy(grille[i], 0, solution[i], 0, 9);
 
-        supprimerChiffres(5);
+        supprimerChiffres(10);
     }
 }
